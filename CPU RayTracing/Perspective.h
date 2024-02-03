@@ -2,6 +2,8 @@
 
 #include <iostream>
 #include "Utility.h"
+#include <algorithm>
+
 
 enum SC
 {
@@ -28,7 +30,7 @@ public:
 	static const int HEIGHT = 100;
 
 	// perspective origin
-	vec3 origin = { 0,0,-5 };
+	vec3 origin = { 0,0,-10 };
 
 	// Contains screen corner coordinates
 	ScreenCorners screenCorners{ { -5,5,10}, {5,5,10}, {5, -5, 10}, {-5,-5,10 }};
@@ -38,8 +40,11 @@ public:
 	// initial ray cast array, constant when origin and corners are constant
 	ray initRayArr[WIDTH][HEIGHT];
 
+	// Generates the rays of the inital cast through the screen
 	void generateInitRayArr();
+	// Calculates pixel values from ray intersections with enviroment
 	void calculateScreenArr(const triangularModel model);
+	// Clears the screen
 	void clearScreen();
 };
 

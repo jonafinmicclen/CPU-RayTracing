@@ -116,27 +116,32 @@ struct triangle {
 	// vertex 3
 	vec3 v3;
 	// material info
-	vec3 material;
+	material material;
 	// normal of the surface
 	vec3 normal;
 };
 
 // Model of triangular surfaces.
 struct triangularModel {
-	std::vector<triangle> model;
+	std::vector<triangle> models;
+	std::vector<material> materials;
 };
 
 // Model made of vertices and surfaces
 struct standardModel {
+
 	// Vertex coordinate for each vertex
 	std::vector<vec3> vertices;
 	// Vertex index of each surface
 	std::vector<std::tuple<int, int, int>> surfaces;
+	// Material of each surface, with same indexing
+	std::vector<material> materials;
 
 	// return triangularModel type version of this
 	triangularModel convertToTriModel() const {
 
 		triangularModel triModel;
+		int i = 0;
 
 		for (auto& surface : surfaces) {
 
@@ -146,27 +151,27 @@ struct standardModel {
 			tri.v2 = vertices[std::get<1>(surface)];
 			tri.v3 = vertices[std::get<2>(surface)];
 
-			vec3 AB = tri.v2.cross(tri.v1);		// Calculates normal of the triangle, probably a cleaner way to do this.
-			vec3 AC = tri.v3.cross(tri.v1);
-			vec3 normal = AB.cross(AC);
-			normal.normalise();
+			vec3 edge1 = tri.v2 - tri.v1;
+			vec3 edge2 = tri.v3 - tri.v1;
+			tri.normal = edge1.cross(edge2).normalised();
 
-			tri.normal = normal;
+			tri.material.color_RGB = materials[i].color_RGB;
 
-			triModel.model.push_back(tri);
+			triModel.models.push_back(tri);
+			++i;
 		}
 
 		return triModel;
 	}
 };
 
-inline bool intersectRayTriangle(const ray& r, const triangle& tri) {
+inline bool intersectRayTriangle(const ray& r, const triangle& tri, double& distance) {
 	// Calculate the normal of the triangle
-	vec3 normal = tri.normal.normalised();
+	vec3 normal = tri.normal;
 
 	// Check if the ray is parallel to the triangle
 	double dotProduct = normal.dot(r.direction);
-	if (std::abs(dotProduct) < 1e-6) {
+	if (std::abs(dotProduct) < 1e-20) {
 		return false;
 	}
 
@@ -189,6 +194,8 @@ inline bool intersectRayTriangle(const ray& r, const triangle& tri) {
 	double detT = edge1.cross(edge2).dot(normal);
 	double u = edge3.cross(edge2).dot(normal) / detT;
 	double v = edge1.cross(edge3).dot(normal) / detT;
+
+	distance = (intersectionPoint - r.origin).length();
 
 	return (u >= 0 && v >= 0 && u + v <= 1);
 }

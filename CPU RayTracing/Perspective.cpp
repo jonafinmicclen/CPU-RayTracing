@@ -10,7 +10,7 @@ void Perspective::generateInitRayArr() {
 		for (y = 0; y < HEIGHT; ++y) {
 
 			// Calculate point on screen
-			pointOnScreen = screenCorners.bottomLeft + vec3{ x/10.0, y/10.0, 0 };
+			pointOnScreen = screenCorners.bottomLeft + vec3{ x*10.0/WIDTH, y*10.0/HEIGHT, 0 };
 
 			// Calculate rayVec from origin to screen and add to rayArr
 			initRayArr[int(x)][int(y)].direction = { pointOnScreen - origin };
@@ -25,21 +25,37 @@ void Perspective::calculateScreenArr(const triangularModel model) {
 
 	vec3 intersectionPoint;
 	ray currentRay;
-
+	double distance;
+	double minDistance;
+	vec3 color;
 	int x, y;
+	bool intersected = false;
 
 	for (x = 0; x < WIDTH; ++x) {
 		for (y = 0; y < HEIGHT; ++y) {
 
 			currentRay = initRayArr[x][y];
+			// Reset color and minimum distance values for calculating nearest color
+			minDistance = 100000000;
+			color = { 0,0,0 };
 
-			for (auto& tri : model.model) {
+			for (auto& tri : model.models) {
 
-				if (intersectRayTriangle(currentRay, tri)) {
+				if (intersectRayTriangle(currentRay, tri, distance)) {
 
-					ScreenArr[x][y] = { 1,1,1 };
+					// Only add the color of the nearest intersection with the ray
+					if (distance < minDistance) {
+						intersected = true;
+						color = tri.material.color_RGB;
+						minDistance = distance;
+					}
 
 				}
+			}
+			// Add the color to the screen array after calculating correct value
+			if (intersected) {
+				ScreenArr[x][y] = color;
+				intersected = false;
 			}
 		}
 	}

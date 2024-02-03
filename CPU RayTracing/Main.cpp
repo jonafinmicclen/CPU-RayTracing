@@ -4,7 +4,7 @@
 #include <SDL.h>
 
 // Create a cube for testing
-standardModel createCube(double sideLength, const vec3& position = { 0, 0, 0 }) {
+standardModel createCube(double sideLength) {
     // Define the vertices of the cube
     vec3 v1 = { -sideLength / 2, -sideLength / 2, -sideLength / 2 };
     vec3 v2 = { sideLength / 2, -sideLength / 2, -sideLength / 2 };
@@ -15,28 +15,26 @@ standardModel createCube(double sideLength, const vec3& position = { 0, 0, 0 }) 
     vec3 v7 = { sideLength / 2, sideLength / 2, sideLength / 2 };
     vec3 v8 = { -sideLength / 2, sideLength / 2, sideLength / 2 };
 
-    // Translate vertices to the specified position
-    v1 = v1 + position;
-    v2 = v2 + position;
-    v3 = v3 + position;
-    v4 = v4 + position;
-    v5 = v5 + position;
-    v6 = v6 + position;
-    v7 = v7 + position;
-    v8 = v8 + position;
-
     // Define the surfaces of the cube using vertex indices
     std::vector<std::tuple<int, int, int>> surfaces = {
-        {0, 1, 2}, {2, 3, 0},
-        {4, 5, 6}, {6, 7, 4},
-        {0, 4, 7}, {7, 3, 0},
+        {0, 1, 2}, {0,3,2},
+        {4, 5, 6}, {4,7,6},
+        {0, 4, 7}, {7,0,3},
         {1, 5, 6}, {6, 2, 1},
         {0, 1, 5}, {5, 4, 0},
         {2, 3, 7}, {7, 6, 2}
     };
+    std::vector<material> materials = {
+        {1,0,0}, {1,0,0},
+        {0,1,0}, {0,1,0},
+        {0,0,1}, {0,0,1},
+        {1,0,0}, {1,0,0},
+        {0,1,0}, {0,1,0},
+        {0,0,1}, {0,0,1}
+    };
 
     // Create the cube instance of standardModel
-    return { {v1, v2, v3, v4, v5, v6, v7, v8}, surfaces };
+    return { {v1, v2, v3, v4, v5, v6, v7, v8}, surfaces, materials };
 }
 
 static void rotateVec3(vec3& vec, double angleRadians, const vec3 axis) {
@@ -90,9 +88,9 @@ void drawPixel(SDL_Renderer* renderer, int x, int y, Uint8 red, Uint8 green, Uin
 int main(int argc, char* args[]) {
 
     // Initialise cube model for rendering
-    standardModel cube = createCube(3);
+    standardModel cube = createCube(9);
     for (auto& v : cube.vertices) {
-        v = v + vec3({0, -2, 15});
+        v = v + vec3({0, -2, 20});
     }
     triangularModel triCube = cube.convertToTriModel();
 
@@ -128,7 +126,7 @@ int main(int argc, char* args[]) {
 
         // Rotate logic
         for (auto& v : cube.vertices) {
-            rotateVec3AroundPoint(v, 0.01, { 0,1,1 }, { 0,-2,15 });
+            rotateVec3AroundPoint(v, 0.01, { 0,1,0 }, { 0,-2,20 });
         }
         triCube = cube.convertToTriModel();
 

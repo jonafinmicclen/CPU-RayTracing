@@ -43,5 +43,16 @@ void Perspective::calculateScreenArr(const triangularModel model) {
 			}
 		}
 	}
+}
 
+void Perspective::clearScreen()
+{
+	int x, y;
+	for (x = 0; x < WIDTH; ++x) {
+		for (y = 0; y < HEIGHT; ++y) {
+
+			ScreenArr[x][y] = { 0,0,0 };
+
+		}
+	}
 }

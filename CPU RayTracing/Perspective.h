@@ -23,12 +23,12 @@ class Perspective
 {
 public:
 	// measured in pixels
-	static const int WIDTH = 60;
+	static const int WIDTH = 100;
 	// measured in pixels
-	static const int HEIGHT = 60;
+	static const int HEIGHT = 100;
 
 	// perspective origin
-	vec3 origin = { 0,0,-10 };
+	vec3 origin = { 0,0,-5 };
 
 	// Contains screen corner coordinates
 	ScreenCorners screenCorners{ { -5,5,10}, {5,5,10}, {5, -5, 10}, {-5,-5,10 }};
@@ -40,5 +40,6 @@ public:
 
 	void generateInitRayArr();
 	void calculateScreenArr(const triangularModel model);
+	void clearScreen();
 };
 

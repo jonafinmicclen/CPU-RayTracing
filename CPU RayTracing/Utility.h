@@ -1,6 +1,8 @@
 #pragma once
 
 #include <cmath>
+#include <vector>
+#include <tuple>
 
 // Spacial vector of x, y, z. Contains common mathematical methods.
 struct vec3 {
@@ -12,8 +14,9 @@ struct vec3 {
 	// z coordinate of vector
 	double z;
 
+
 	// Reflect with normal and return new vector, current vector unchanged
-	vec3 relfect(const vec3& normal) const {
+	vec3 reflect(const vec3& normal) const {
 		return *this - (normal * dot(normal) * 2);
 	}
 
@@ -41,8 +44,17 @@ struct vec3 {
 	}
 
 	// Returns the dot product
-	float dot(const vec3& other) const {
+	double dot(const vec3& other) const {
 		return x * other.x + y * other.y + z * other.z;
+	}
+
+	// Returns the cross product
+	vec3 cross(const vec3& other) const {
+		return vec3({
+			y * other.z - z * other.y,
+			z * other.x - x * other.z,
+			x * other.y - y * other.x
+			});
 	}
 
 	// Returns the euclidian length
@@ -84,12 +96,18 @@ struct ray {
 	// ray direction vector
 	vec3 direction;
 	// ray color, RGB
-	vec3 color;
+	vec3 color_RGB;
 	// ray distance traveled, to calculate itensity
-	float distanceTraveled;
+	double distanceTraveled;
 };
 
-// Represents a triangular structure to make up larger visual objects.
+// Contains information for updating ray color after a bounce.
+struct material {
+	// RGB color of a material
+	vec3 color_RGB;
+};
+
+// Represents a trianglular surface.
 struct triangle {
 	// vertex 1
 	vec3 v1;
@@ -97,6 +115,80 @@ struct triangle {
 	vec3 v2;
 	// vertex 3
 	vec3 v3;
-	// color, RGB
-	vec3 color;
+	// material info
+	vec3 material;
+	// normal of the surface
+	vec3 normal;
 };
+
+// Model of triangular surfaces.
+struct triangularModel {
+	std::vector<triangle> model;
+};
+
+// Model made of vertices and surfaces
+struct standardModel {
+	// Vertex coordinate for each vertex
+	std::vector<vec3> vertices;
+	// Vertex index of each surface
+	std::vector<std::tuple<int, int, int>> surfaces;
+
+	// return triangularModel type version of this
+	triangularModel convertToTriModel() const {
+
+		triangularModel triModel;
+
+		for (auto& surface : surfaces) {
+
+			triangle tri;
+
+			tri.v1 = vertices[std::get<0>(surface)];
+			tri.v2 = vertices[std::get<1>(surface)];
+			tri.v3 = vertices[std::get<2>(surface)];
+
+			vec3 AB = tri.v2.cross(tri.v1);		// Calculates normal of the triangle, probably a cleaner way to do this.
+			vec3 AC = tri.v3.cross(tri.v1);
+			vec3 normal = AB.cross(AC);
+			normal.normalise();
+
+			tri.normal = normal;
+
+			triModel.model.push_back(tri);
+		}
+
+		return triModel;
+	}
+};
+
+inline bool intersectRayTriangle(const ray& r, const triangle& tri) {
+	// Calculate the normal of the triangle
+	vec3 normal = tri.normal.normalised();
+
+	// Check if the ray is parallel to the triangle
+	double dotProduct = normal.dot(r.direction);
+	if (std::abs(dotProduct) < 1e-6) {
+		return false;
+	}
+
+	// Calculate the distance from the ray origin to the triangle plane
+	double t = normal.dot(tri.v1 - r.origin) / dotProduct;
+
+	// Check if the intersection point is behind the ray origin
+	if (t < 0) {
+		return false;
+	}
+
+	// Calculate the intersection point
+	vec3 intersectionPoint = r.origin + r.direction * t;
+
+	// Check if the intersection point is inside the triangle
+	vec3 edge1 = tri.v2 - tri.v1;
+	vec3 edge2 = tri.v3 - tri.v1;
+	vec3 edge3 = intersectionPoint - tri.v1;
+
+	double detT = edge1.cross(edge2).dot(normal);
+	double u = edge3.cross(edge2).dot(normal) / detT;
+	double v = edge1.cross(edge3).dot(normal) / detT;
+
+	return (u >= 0 && v >= 0 && u + v <= 1);
+}

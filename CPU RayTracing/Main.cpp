@@ -3,11 +3,12 @@
 
 int main() {
 
-    vec3 a = { 1,1,1 };
-    vec3 b = { 1,1,1 };
+    vec3 a = { 0,1,0 };
+    vec3 b = { 0,1,0.1 };
+    a.normalise();
+    b.normalise();
 
-    std::cout << a.dot(b);
-    std::cout << a.length();
+    std::cout << a.relfect(b);
 
     return 0;
 }

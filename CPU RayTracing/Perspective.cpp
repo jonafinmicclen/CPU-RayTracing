@@ -2,20 +2,20 @@
 
 void Perspective::generateInitRayArr() {
 
-	int x;
-	int y;
+	double x;
+	double y;
 	vec3 pointOnScreen;
 
 	for (x = 0; x < WIDTH; ++x) {
 		for (y = 0; y < HEIGHT; ++y) {
 
 			// Calculate point on screen
-			pointOnScreen = screenCorners.bottomLeft + vec3{ (x, y, 0) };
+			pointOnScreen = screenCorners.bottomLeft + vec3{ x/10.0, y/10.0, 0 };
 
 			// Calculate rayVec from origin to screen and add to rayArr
-			initRayArr[x][y].direction = { pointOnScreen - origin };
-			initRayArr[x][y].direction.normalise();
-			initRayArr[x][y].origin = { origin };
+			initRayArr[int(x)][int(y)].direction = { pointOnScreen - origin };
+			initRayArr[int(x)][int(y)].direction.normalise();
+			initRayArr[int(x)][int(y)].origin = { origin };
 
 		}
 	}

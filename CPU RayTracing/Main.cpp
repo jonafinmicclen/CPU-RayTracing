@@ -40,11 +40,11 @@ standardModel createCube(double sideLength, const vec3& position = { 0, 0, 0 }) 
 
 int main() {
 
-    standardModel cube = createCube(4);
+    standardModel cube = createCube(2);
 
     cube.vertices;
     for (auto& v : cube.vertices) {
-        v = v + vec3({100, 0, 0});
+        v = v + vec3({0, 0, 20});
     }
 
     triangularModel triCube = cube.convertToTriModel();

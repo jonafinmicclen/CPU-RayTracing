@@ -28,7 +28,7 @@ public:
 	static const int HEIGHT = 60;
 
 	// perspective origin
-	vec3 origin = { 0,0,0 };
+	vec3 origin = { 0,0,-10 };
 
 	// Contains screen corner coordinates
 	ScreenCorners screenCorners{ { -5,5,10}, {5,5,10}, {5, -5, 10}, {-5,-5,10 }};

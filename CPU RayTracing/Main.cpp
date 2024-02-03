@@ -40,7 +40,13 @@ standardModel createCube(double sideLength, const vec3& position = { 0, 0, 0 }) 
 
 int main() {
 
-    standardModel cube = createCube(10);
+    standardModel cube = createCube(4);
+
+    cube.vertices;
+    for (auto& v : cube.vertices) {
+        v = v + vec3({100, 0, 0});
+    }
+
     triangularModel triCube = cube.convertToTriModel();
 
     Perspective* p;
@@ -48,6 +54,15 @@ int main() {
 
     p->generateInitRayArr();
     p->calculateScreenArr(triCube);
+
+    for (int y = 59; y >= 0; --y) {
+        for (int x = 0; x < 60; ++x) {
+
+            std::cout << p->ScreenArr[x][y].x << " ";
+
+        }
+        std::cout << "\n";
+    }
 
     delete p;
 

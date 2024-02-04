@@ -25,12 +25,12 @@ class Perspective
 {
 public:
 	// measured in pixels
-	static const int WIDTH = 100;
+	static const int WIDTH = 200;
 	// measured in pixels
-	static const int HEIGHT = 100;
+	static const int HEIGHT = 200;
 
 	// perspective origin
-	vec3 origin = { 0,0,-10 };
+	vec3 origin = { 0,0,-2 };
 
 	// Contains screen corner coordinates
 	ScreenCorners screenCorners{ { -5,5,10}, {5,5,10}, {5, -5, 10}, {-5,-5,10 }};

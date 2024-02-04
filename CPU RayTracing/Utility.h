@@ -99,6 +99,15 @@ struct ray {
 	vec3 color_RGB;
 	// ray distance traveled, to calculate itensity
 	double distanceTraveled;
+
+	// returns the reflected ray
+	ray reflect(const vec3& normal, const vec3& intersectionPoint) {
+
+		ray newRay = *this;
+		newRay.direction = direction - normal.normalised() * 2.0 * direction.dot(normal.normalised());
+		newRay.origin = intersectionPoint;
+		return newRay;
+	}
 };
 
 // Contains information for updating ray color after a bounce.
@@ -107,7 +116,15 @@ struct material {
 	vec3 color_RGB;
 };
 
-// Represents a trianglular surface.
+// Currently unused
+struct shadeBuffer {
+	// contains where the shade should be applied
+	vec3 position;
+	// contains the shading information, vec3 for more complex shading filters.
+	vec3 shade;
+};
+
+// Represents a trianglular surface/face.
 struct triangle {
 	// vertex 1
 	vec3 v1;
@@ -119,6 +136,18 @@ struct triangle {
 	material material;
 	// normal of the surface
 	vec3 normal;
+	// contains information about the shading on the surface
+
+
+	// Calculates the normal from the 3 vertices
+	void calculateNormal() {
+		try {
+			normal = (v2 - v1).cross(v3 - v1).normalised();
+		}
+		catch (std::exception& e) {
+			std::cerr << "Error calculating normal: " << e.what() << std::endl;
+		}
+	}
 };
 
 // Model of triangular surfaces.
@@ -140,6 +169,7 @@ struct standardModel {
 	// return triangularModel type version of this
 	triangularModel convertToTriModel() const {
 
+		// Initalises the model
 		triangularModel triModel;
 		int i = 0;
 
@@ -147,16 +177,14 @@ struct standardModel {
 
 			triangle tri;
 
+			// Create tri object for poly in the model
 			tri.v1 = vertices[std::get<0>(surface)];
 			tri.v2 = vertices[std::get<1>(surface)];
 			tri.v3 = vertices[std::get<2>(surface)];
-
-			vec3 edge1 = tri.v2 - tri.v1;
-			vec3 edge2 = tri.v3 - tri.v1;
-			tri.normal = edge1.cross(edge2).normalised();
-
+			tri.calculateNormal();
 			tri.material.color_RGB = materials[i].color_RGB;
 
+			// Add the tri object to the new model
 			triModel.models.push_back(tri);
 			++i;
 		}
@@ -165,7 +193,29 @@ struct standardModel {
 	}
 };
 
-inline bool intersectRayTriangle(const ray& r, const triangle& tri, double& distance) {
+struct lightSource {
+
+	// Center of light source
+	vec3 position;
+	// Color of light source
+	vec3 color;
+	// Radius of light source
+	double radius;
+	// How bright (0-1) not neccessary default 1
+	double intensity = 1;
+
+};
+
+inline bool intersectRayLightSource(const ray& r, const lightSource& src, double& distance) {
+
+		return (2.0f * (r.origin - src.position).dot(r.direction)) * 
+			(2.0f * (r.origin - src.position).dot(r.direction)) - 4 * 
+			(r.direction.dot(r.direction)) * 
+			((r.origin - src.position).dot(r.origin - src.position) 
+				- src.radius * src.radius) >= 0;
+}
+
+inline bool intersectRayTriangle(const ray& r, const triangle& tri, double& distance, vec3& intersectionPoint) {
 	// Calculate the normal of the triangle
 	vec3 normal = tri.normal;
 
@@ -184,7 +234,7 @@ inline bool intersectRayTriangle(const ray& r, const triangle& tri, double& dist
 	}
 
 	// Calculate the intersection point
-	vec3 intersectionPoint = r.origin + r.direction * t;
+	intersectionPoint = r.origin + r.direction * t;
 
 	// Check if the intersection point is inside the triangle
 	vec3 edge1 = tri.v2 - tri.v1;
@@ -198,4 +248,9 @@ inline bool intersectRayTriangle(const ray& r, const triangle& tri, double& dist
 	distance = (intersectionPoint - r.origin).length();
 
 	return (u >= 0 && v >= 0 && u + v <= 1);
+}
+
+// Mathematical sigmoid function
+inline double sigmoid(const double x) {
+	return 1 / (1 + std::pow(2.71828, -x));
 }

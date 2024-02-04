@@ -28,14 +28,89 @@ standardModel createCube(double sideLength) {
         {1,0,0}, {1,0,0},
         {0,1,0}, {0,1,0},
         {0,0,1}, {0,0,1},
-        {1,0,0}, {1,0,0},
-        {0,1,0}, {0,1,0},
-        {0,0,1}, {0,0,1}
+        {0.5,0.5,0}, {0.5,0.5,0},
+        {0,0.5,0.5}, {0,0.5,0.5},
+        {0.5,0,0.5}, {0.5,0,0.5}
     };
 
     // Create the cube instance of standardModel
     return { {v1, v2, v3, v4, v5, v6, v7, v8}, surfaces, materials };
 }
+
+// Dodecahedron for testing
+standardModel createDodecahedron(double sideLength) {
+    // Golden ratio
+    double phi = (1 + sqrt(5)) / 2;
+
+    // Define the vertices of the dodecahedron
+    vec3 v1 = { -sideLength / 2, -sideLength / 2, -sideLength / (2 * phi) };
+    vec3 v2 = { sideLength / 2, -sideLength / 2, -sideLength / (2 * phi) };
+    vec3 v3 = { -sideLength / (2 * phi), 0, -phi * sideLength / 2 };
+    vec3 v4 = { sideLength / (2 * phi), 0, -phi * sideLength / 2 };
+    vec3 v5 = { 0, -phi * sideLength / 2, -sideLength / 2 };
+    vec3 v6 = { 0, -phi * sideLength / 2, sideLength / 2 };
+    vec3 v7 = { -sideLength / 2, sideLength / 2, sideLength / (2 * phi) };
+    vec3 v8 = { sideLength / 2, sideLength / 2, sideLength / (2 * phi) };
+    vec3 v9 = { -sideLength / (2 * phi), 0, phi * sideLength / 2 };
+    vec3 v10 = { sideLength / (2 * phi), 0, phi * sideLength / 2 };
+    vec3 v11 = { 0, phi * sideLength / 2, -sideLength / 2 };
+    vec3 v12 = { 0, phi * sideLength / 2, sideLength / 2 };
+
+    // Define the surfaces of the dodecahedron using vertex indices
+    std::vector<std::tuple<int, int, int>> surfaces = {
+        {1, 9, 5}, {1, 5, 2}, {2, 5, 12},
+        {2, 12, 8}, {8, 12, 4}, {4, 12, 11},
+        {4, 11, 7}, {7, 11, 3}, {3, 11, 10},
+        {3, 10, 6}, {6, 10, 1}, {1, 10, 9},
+        {9, 8, 5}, {5, 8, 12}, {12, 8, 4},
+        {4, 7, 11}, {11, 7, 3}, {3, 6, 10},
+        {10, 6, 1}, {9, 10, 8}, {8, 10, 4},
+        {5, 12, 6}, {6, 12, 11}, {7, 3, 2}
+    };
+
+    std::vector<material> materials = {
+        {1, 0, 0}, {1, 0, 0}, {1, 0, 0},
+        {1, 0, 0}, {1, 0, 0}, {1, 0, 0},
+        {0, 1, 0}, {0, 1, 0}, {0, 1, 0},
+        {0, 1, 0}, {0, 1, 0}, {0, 1, 0},
+        {0, 0, 1}, {0, 0, 1}, {0, 0, 1},
+        {0, 0, 1}, {0, 0, 1}, {0, 0, 1},
+        {1, 1, 0}, {1, 1, 0}, {1, 1, 0},
+        {1, 1, 0}, {1, 1, 0}, {1, 1, 0}
+    };
+
+    // Create the dodecahedron instance of standardModel
+    return { {v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12}, surfaces, materials };
+}
+
+
+// Pyramid for testing
+standardModel createPyramid(double baseLength, double height) {
+    // Define the vertices of the pyramid
+    vec3 v1 = { 0, 0, 0 };
+    vec3 v2 = { baseLength / 2, 0, -baseLength / 2 * sqrt(3) };
+    vec3 v3 = { -baseLength / 2, 0, -baseLength / 2 * sqrt(3) };
+    vec3 v4 = { 0, height, 0 };
+
+    // Define the surfaces of the pyramid using vertex indices
+    std::vector<std::tuple<int, int, int>> surfaces = {
+        {0, 1, 2},
+        {0, 1, 3},
+        {1, 2, 3},
+        {2, 0, 3}
+    };
+
+    std::vector<material> materials = {
+        {1,0,0},
+        {0,1,0},
+        {0,0,1},
+        {0.5,0.5,0}
+    };
+
+    // Create the pyramid instance of standardModel
+    return { {v1, v2, v3, v4}, surfaces, materials };
+}
+
 
 static void rotateVec3(vec3& vec, double angleRadians, const vec3 axis) {
 
@@ -77,22 +152,30 @@ static void rotateVec3AroundPoint(vec3& vec, double angleRadians, const vec3& ax
     translate(vec, { point.x, point.y, point.z });
 }
 
-const int SCREEN_WIDTH = 100;
-const int SCREEN_HEIGHT = 100;
-
 void drawPixel(SDL_Renderer* renderer, int x, int y, Uint8 red, Uint8 green, Uint8 blue) {
     SDL_SetRenderDrawColor(renderer, red, green, blue, 255);
     SDL_RenderDrawPoint(renderer, x, y);
 }
 
+// Global variables for easy control over animation
+const vec3 MODEL_POSITION = { 0,0,2 };
+const vec3 ROTATION_AXIS = { 1,1,0 };
+const double ROTATION_SPEED = 0.01;
+const vec3 ROTATION_POINT = MODEL_POSITION;
+
+const int SCREEN_WIDTH = 200;
+const int SCREEN_HEIGHT = 200;
+
 int main(int argc, char* args[]) {
 
-    // Initialise cube model for rendering
-    standardModel cube = createCube(9);
-    for (auto& v : cube.vertices) {
-        v = v + vec3({0, -2, 20});
+    // Initialise a model for rendering
+    standardModel stdModel = createCube(2);
+
+    //standardModel pyramid = 
+    for (auto& v : stdModel.vertices) {
+        v = v + vec3(MODEL_POSITION);
     }
-    triangularModel triCube = cube.convertToTriModel();
+    triangularModel triCube = stdModel.convertToTriModel();
 
     // Init perspective for rendering
     Perspective* p;
@@ -102,7 +185,7 @@ int main(int argc, char* args[]) {
     // Create SDL context
     SDL_Init(SDL_INIT_VIDEO);
 
-    SDL_Window* window = SDL_CreateWindow("Pixel Drawing", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+    SDL_Window* window = SDL_CreateWindow("Ray-Tracing CPU", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
     SDL_Event e;
@@ -125,10 +208,12 @@ int main(int argc, char* args[]) {
         }
 
         // Rotate logic
-        for (auto& v : cube.vertices) {
-            rotateVec3AroundPoint(v, 0.01, { 0,1,0 }, { 0,-2,20 });
+        for (auto& triangle : triCube.models) {
+            rotateVec3AroundPoint(triangle.v1, ROTATION_SPEED, ROTATION_AXIS, ROTATION_POINT);
+            rotateVec3AroundPoint(triangle.v2, ROTATION_SPEED, ROTATION_AXIS, ROTATION_POINT);
+            rotateVec3AroundPoint(triangle.v3, ROTATION_SPEED, ROTATION_AXIS, ROTATION_POINT);
+            triangle.calculateNormal();
         }
-        triCube = cube.convertToTriModel();
 
         SDL_RenderPresent(renderer);
     }

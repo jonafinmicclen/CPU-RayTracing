@@ -2,7 +2,6 @@
 
 #include "Utility.h"
 
-
 // Create a cube for testing
 inline standardModel createCube(double sideLength) {
     // Define the vertices of the cube

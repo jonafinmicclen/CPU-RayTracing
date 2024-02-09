@@ -102,6 +102,11 @@ struct vec3 {
 
 };
 
+struct ivec2 {
+	int x;
+	int y;
+};
+
 inline vec3 returnRotatedVec3(const vec3 vec, double angleRadians, const vec3 axis) {
 
 	double cosAngle = cos(angleRadians);
@@ -328,11 +333,11 @@ struct scene {
 struct lightSource {
 
 	// Center of light source
-	vec3 position;
+	vec3 position = { 0,0,0 };
 	// Color of light source
-	vec3 color;
+	vec3 color = { 1,1,1 };
 	// Radius of light source
-	double radius;
+	double radius = 1;
 	// How bright (0-1) not neccessary default 1
 	double intensity = 1;
 

@@ -21,9 +21,14 @@ void Perspective::generateInitRayArr() {
 	}
 }
 
-void Perspective::calculateScreenArr(const triangularModel model)
+void Perspective::calculateScreenArr()
 {
 }
+
+void Perspective::calculatePixel(const ivec2)
+{
+}
+
 
 void Perspective::clearScreen()
 {

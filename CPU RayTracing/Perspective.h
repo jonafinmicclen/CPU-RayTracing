@@ -23,7 +23,8 @@ struct ScreenCorners {
 
 class Perspective
 {
-public:
+protected:
+
 	// measured in pixels
 	static const int WIDTH = 200;
 	// measured in pixels
@@ -35,10 +36,14 @@ public:
 	// Contains screen corner coordinates
 	ScreenCorners screenCorners{ { -5,5,10}, {5,5,10}, {5, -5, 10}, {-5,-5,10 }};
 
-	// Contains color values for screen
-	vec3 ScreenArr[WIDTH][HEIGHT];
 	// initial ray cast array, constant when origin and corners are constant
 	ray initRayArr[WIDTH][HEIGHT];
+
+public:
+	// Contains the scene
+	scene scene_p;
+	// Contains color values for screen
+	vec3 ScreenArr[WIDTH][HEIGHT];
 
 	// Generates the rays of the inital cast through the screen
 	void generateInitRayArr();
@@ -46,5 +51,6 @@ public:
 	void calculateScreenArr(const triangularModel model);
 	// Clears the screen
 	void clearScreen();
+
 };
 

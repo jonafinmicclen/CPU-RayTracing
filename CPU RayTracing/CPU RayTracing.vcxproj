@@ -128,6 +128,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Perspective.h" />
+    <ClInclude Include="Tests.h" />
     <ClInclude Include="Utility.h" />
   </ItemGroup>
   <ItemGroup>

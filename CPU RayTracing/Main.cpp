@@ -4,7 +4,8 @@
 #include <SDL.h>
 #include "Tests.h"
 
-void drawPixel(SDL_Renderer* renderer, int x, int y, vec3 color) {
+void drawPixel(SDL_Renderer* renderer, int x, int y, vec3 color) 
+{
     SDL_SetRenderDrawColor(renderer, color.x, color.y, color.z, 255);
     SDL_RenderDrawPoint(renderer, x, y);
 }
@@ -24,10 +25,18 @@ int main(int argc, char* args[])
     stdModel.translate(MODEL_POSITION);
     triangularModel triCube = stdModel.convertToTriModel();
 
+    // Initalise a light source for rendering
+    lightSource lSource;
+    lSource.position = { 0,-2,0 };
+
     // Init perspective for rendering
     Perspective* perspective;
     perspective = new Perspective();
     perspective->generateInitRayArr();
+
+    // Add our previously generated models
+    perspective->scene_p.sceneFreeTriModels.push_back(triCube);
+    perspective->scene_p.sceneFixedLightSources.push_back(lSource);
 
     // Create SDL context
     SDL_Init(SDL_INIT_VIDEO);
@@ -47,7 +56,7 @@ int main(int argc, char* args[])
 
         // Draw logic
         perspective->clearScreen();
-        perspective->calculateScreenArr(triCube);
+        perspective->calculateScreenArr();
         for (int y = 0; y < SCREEN_HEIGHT; ++y) {
             for (int x = 0; x < SCREEN_WIDTH; ++x) {
                 drawPixel(renderer, x, y, perspective->ScreenArr[x][y]);

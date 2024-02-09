@@ -48,7 +48,9 @@ public:
 	// Generates the rays of the inital cast through the screen
 	void generateInitRayArr();
 	// Calculates pixel values from ray intersections with enviroment
-	void calculateScreenArr(const triangularModel model);
+	void calculateScreenArr();
+	// Calculates 1 pixel
+	void calculatePixel(const ivec2);
 	// Clears the screen
 	void clearScreen();
 

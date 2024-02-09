@@ -38,6 +38,8 @@ protected:
 
 	// initial ray cast array, constant when origin and corners are constant
 	ray initRayArr[WIDTH][HEIGHT];
+	// current displayed ray cast array
+	rayPath currentRayPath[WIDTH][HEIGHT];
 
 public:
 	// Contains the scene
@@ -53,6 +55,8 @@ public:
 	void calculatePixel(const ivec2);
 	// Clears the screen
 	void clearScreen();
+	// Sets current ray arr to init ray arr
+	void copyInitToCurrentRayArr();
 
 };
 

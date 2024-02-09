@@ -16,7 +16,6 @@ int main(int argc, char* args[])
     // Variables for easy control over animation
     const vec3 MODEL_POSITION = { 0,0,2 };
     const rotator ROTATION = { {1,1,0}, 0.01, MODEL_POSITION };
-
     const int SCREEN_WIDTH = 200;
     const int SCREEN_HEIGHT = 200;
 

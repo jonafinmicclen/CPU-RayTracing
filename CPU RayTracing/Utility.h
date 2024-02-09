@@ -174,6 +174,11 @@ struct shadeBuffer {
 	vec3 shade;
 };
 
+struct rayPath {
+	std::vector<ray> steps;
+
+};
+
 // Represents a trianglular surface/face.
 struct triangle {
 	// vertex 1

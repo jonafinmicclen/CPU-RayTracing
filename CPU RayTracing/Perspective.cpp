@@ -19,6 +19,17 @@ void Perspective::generateInitRayArr() {
 
 		}
 	}
+
+	copyInitToCurrentRayArr();
+}
+
+void Perspective::copyInitToCurrentRayArr() {
+	for (int i = 0; i < WIDTH; ++i) {
+		for (int j = 0; j < HEIGHT; ++j) {
+			currentRayPath[i][j].steps.clear();
+			currentRayPath[i][j].steps.push_back(initRayArr[i][j]);
+		}
+	}
 }
 
 void Perspective::calculateScreenArr()

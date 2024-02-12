@@ -2,10 +2,11 @@
 
 void Perspective::generateInitRayArr() {
 
-	double x;
-	double y;
+	// Point on virtual screen which rays path through
 	vec3 pointOnScreen;
 
+	double x;
+	double y;
 	for (x = 0; x < WIDTH; ++x) {
 		for (y = 0; y < HEIGHT; ++y) {
 
@@ -19,6 +20,7 @@ void Perspective::generateInitRayArr() {
 
 		}
 	}
+	resetPaths();
 }
 
 void Perspective::calculateScreenArr(const triangularModel model) {
@@ -33,8 +35,6 @@ void Perspective::calculateScreenArr(const triangularModel model) {
 	bool intersected = false;
 	int bounces;
 	bool done = false;
-
-
 
 	vec3 lastNormal, lastIntersectionPoint;
 
@@ -64,7 +64,7 @@ void Perspective::calculateScreenArr(const triangularModel model) {
 				}
 
 				// Does it hit the model
-				for (auto& tri : model.models) {
+				for (auto& tri : model.tris) {
 					if (intersectRayTriangle(currentRay, tri, distance, intersectionPoint)) {
 						if (distance < minDistance) {
 
@@ -101,6 +101,21 @@ void Perspective::calculateScreenArr(const triangularModel model) {
 	}
 }
 
+void Perspective::testScreenArrFill() {
+	for (int x = 0; x < WIDTH / SPLIT_WIDTH_THREAD; ++x) {
+		threadPool.enqueue([this, x] {
+			calculatePathsForRow(x * SPLIT_WIDTH_THREAD);
+			});
+	}
+}
+
+void Perspective::calculatePathsForRow(int x) {
+	for (int y = 0; y < HEIGHT; ++y) {
+		for (int b = 0; b < SPLIT_WIDTH_THREAD; ++b) {
+			calculatePath({ x + b, y });
+		}
+	}
+}
 void Perspective::clearScreen()
 {
 	int x, y;
@@ -110,5 +125,90 @@ void Perspective::clearScreen()
 			ScreenArr[x][y] = { 0,0,0 };
 
 		}
+	}
+}
+
+void Perspective::resetPaths()
+{
+	int x, y;
+	for (x = 0; x < WIDTH; ++x) {
+		for (y = 0; y < HEIGHT; ++y) 
+		{	
+			// Reset first ray default values
+			rayPaths[x][y].segment[0] = initRayArr[x][y];
+			rayPaths[x][y].illuminated = false;
+			rayPaths[x][y].intersected = false;
+		}
+	}
+}
+
+void Perspective::calculatePath(const ivec2 pixelCoord)
+{
+	rayPath* currentPath = &rayPaths[pixelCoord.x][pixelCoord.y];
+
+	int max_segments = 6;
+	int current_segment_index;
+
+	vec3 intersectionPoint;
+	vec3 closest_intersection;
+	vec3 closest_normal;
+	double distance;
+
+	// Closest triangle on this pass
+	double closest_distance = 9999999999999;
+	bool intersected;
+	bool done = false;
+
+	ray* current_segment = &currentPath->segment[0];
+
+	for (current_segment_index = 0; current_segment_index < max_segments; ++current_segment_index, ++current_segment) 
+	{
+		// Current segment in for loop
+		
+
+		// Loop on triangles
+		for (const triangularModel& model : scene.models) {
+			for (const triangle& tri : model.tris) 
+			{
+				if ((current_segment->intersectTriangle(tri, distance, intersectionPoint)) and (distance < closest_distance))
+				{
+					intersected = true;
+					closest_intersection = intersectionPoint;
+					closest_normal = tri.normal;
+					closest_distance = distance;
+					currentPath->intersected = true;
+					current_segment->color_RGB = tri.material.color_RGB;
+					current_segment->distanceTraveled = distance;
+				}
+			}
+		}
+
+		// Loop on light sources 
+		for (const lightSource& lSource : scene.light_sources) 
+		{
+			if ((current_segment->intersectLightSource(lSource, distance)) and (distance < closest_distance))
+			{
+				currentPath->illuminated = true;
+				currentPath->completion_index = current_segment_index;
+				done = true;
+				break;
+			}
+		}
+
+		if (done) {
+			break;
+		}
+
+		if (current_segment_index < max_segments - 1) 
+		{
+			// Set the next ray to continue from last
+			*(current_segment + 1) = current_segment->reflect(closest_normal, closest_intersection);
+		}
+	}
+	done = false;
+
+	// Temp fill screen
+	if (currentPath->illuminated and currentPath->intersected) {
+		ScreenArr[pixelCoord.x][pixelCoord.y] = currentPath->segment[0].color_RGB; /// std::pow(currentPath->segment[0].distanceTraveled, 2);
 	}
 }

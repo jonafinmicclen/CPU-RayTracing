@@ -163,23 +163,58 @@ const vec3 ROTATION_AXIS = { 1,1,0 };
 const double ROTATION_SPEED = 0.01;
 const vec3 ROTATION_POINT = MODEL_POSITION;
 
-const int SCREEN_WIDTH = 200;
-const int SCREEN_HEIGHT = 200;
+const int SCREEN_WIDTH = 400;
+const int SCREEN_HEIGHT = 400;
 
 int main(int argc, char* args[]) {
 
     // Initialise a model for rendering
-    standardModel stdModel = createCube(2);
+    standardModel stdModel = createCube(1);
+    standardModel bigCube = createCube(100);
+    //standardModel pyramid = 
+    for (auto& v : bigCube.vertices) {
+        v = v + vec3({ -200, 0, 0 });
+    }
 
     //standardModel pyramid = 
     for (auto& v : stdModel.vertices) {
         v = v + vec3(MODEL_POSITION);
     }
+
+    // Create models for perspective
     triangularModel triCube = stdModel.convertToTriModel();
+    triangularModel tribigCube = bigCube.convertToTriModel(); 
+    lightSource lSource;
+    lSource.color = { 1,1,1 };
+    lSource.position = { 15,10,-300 };
+    lSource.radius = 200;
+
+    // Create scene for perspective
+    Scene newScene;
+    newScene.light_sources.push_back(lSource);
+    newScene.models.push_back(triCube);
+    newScene.models.push_back(tribigCube);
+
+    vec3 translation = { 0,2,0 };
+    for (auto& tri : triCube.tris)
+    {
+        translate(tri.v1, translation);
+        translate(tri.v2, translation);
+        translate(tri.v3, translation);
+
+    }
+
+    lSource.color = { 1,1,1 };
+    lSource.position = { 15,200,0 };
+    lSource.radius = 100;
+
+    newScene.models.push_back(triCube);
+    newScene.light_sources.push_back(lSource);
 
     // Init perspective for rendering
     Perspective* p;
     p = new Perspective();
+    p->scene = newScene;
     p->generateInitRayArr();
 
     // Create SDL context
@@ -200,7 +235,8 @@ int main(int argc, char* args[]) {
 
         // Draw logic
         p->clearScreen();
-        p->calculateScreenArr(triCube);
+        p->resetPaths();
+        p->testScreenArrFill();
         for (int y = 0; y < SCREEN_HEIGHT; ++y) {
             for (int x = 0; x < SCREEN_WIDTH; ++x) {
                 drawPixel(renderer, x, y, p->ScreenArr[x][y].x * 255, p->ScreenArr[x][y].y * 255, p->ScreenArr[x][y].z * 255);
@@ -208,7 +244,7 @@ int main(int argc, char* args[]) {
         }
 
         // Rotate logic
-        for (auto& triangle : triCube.models) {
+        for (auto& triangle : p->scene.models[0].tris) {
             rotateVec3AroundPoint(triangle.v1, ROTATION_SPEED, ROTATION_AXIS, ROTATION_POINT);
             rotateVec3AroundPoint(triangle.v2, ROTATION_SPEED, ROTATION_AXIS, ROTATION_POINT);
             rotateVec3AroundPoint(triangle.v3, ROTATION_SPEED, ROTATION_AXIS, ROTATION_POINT);

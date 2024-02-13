@@ -34,6 +34,7 @@ public:
 	static const int WIDTH = 200;
 	// measured in pixels
 	static const int HEIGHT = 200;
+	double BRIGHTNESS = 8;
 
 	// perspective origin
 	vec3 origin = { 0,0,-2 };
@@ -70,8 +71,8 @@ public:
 	void calculatePath(const ivec2 pixelCoord);
 
 private:
-	std::thread threads[WIDTH];
-	const int SPLIT_WIDTH_THREAD = 50;
-	ThreadPool threadPool{ 4 };
+
+	const int SPLIT_WIDTH_THREAD = 20;
+	ThreadPool threadPool{ 50 };
 };
 

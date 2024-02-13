@@ -170,10 +170,10 @@ int main(int argc, char* args[]) {
 
     // Initialise a model for rendering
     standardModel stdModel = createCube(1);
-    standardModel bigCube = createCube(100);
+    standardModel bigCube = createCube(200);
     //standardModel pyramid = 
     for (auto& v : bigCube.vertices) {
-        v = v + vec3({ -200, 0, 0 });
+        v = v + vec3({ 0, 101, 0 });
     }
 
     //standardModel pyramid = 
@@ -186,8 +186,8 @@ int main(int argc, char* args[]) {
     triangularModel tribigCube = bigCube.convertToTriModel(); 
     lightSource lSource;
     lSource.color = { 1,1,1 };
-    lSource.position = { 15,10,-300 };
-    lSource.radius = 200;
+    lSource.position = { 0,-2,3 };
+    lSource.radius = 0.8;
 
     // Create scene for perspective
     Scene newScene;
@@ -204,12 +204,7 @@ int main(int argc, char* args[]) {
 
     }
 
-    lSource.color = { 1,1,1 };
-    lSource.position = { 15,200,0 };
-    lSource.radius = 200;
-
-    newScene.models.push_back(triCube);
-    newScene.light_sources.push_back(lSource);
+    //newScene.models.push_back(triCube);
 
     // Init perspective for rendering
     Perspective* p;
@@ -234,9 +229,9 @@ int main(int argc, char* args[]) {
         }
 
         // Draw logic
-        p->clearScreen();
+        //p->clearScreen();
         p->resetPaths();
-        p->drawST();
+        p->testScreenArrFill();
         for (int y = 0; y < SCREEN_HEIGHT; ++y) {
             for (int x = 0; x < SCREEN_WIDTH; ++x) {
                 drawPixel(renderer, x, y, p->ScreenArr[x][y].x * 255, p->ScreenArr[x][y].y * 255, p->ScreenArr[x][y].z * 255);

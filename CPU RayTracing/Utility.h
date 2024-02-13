@@ -155,17 +155,15 @@ struct ray {
 	}
 
 	bool intersectTriangle(const triangle& tri, double& distance, vec3& intersectionPoint) {
-		// Calculate the normal of the triangle
-		vec3 normal = tri.normal;
 
 		// Check if the ray is parallel to the triangle
-		double dotProduct = normal.dot(direction);
+		double dotProduct = tri.normal.dot(direction);
 		if (std::abs(dotProduct) < 1e-20) {
 			return false;
 		}
 
 		// Calculate the distance from the ray origin to the triangle plane
-		double t = normal.dot(tri.v1 - origin) / dotProduct;
+		double t = tri.normal.dot(tri.v1 - origin) / dotProduct;
 
 		// Check if the intersection point is behind the ray origin
 		if (t < 0) {
@@ -180,9 +178,9 @@ struct ray {
 		vec3 edge2 = tri.v3 - tri.v1;
 		vec3 edge3 = intersectionPoint - tri.v1;
 
-		double detT = edge1.cross(edge2).dot(normal);
-		double u = edge3.cross(edge2).dot(normal) / detT;
-		double v = edge1.cross(edge3).dot(normal) / detT;
+		double detT = edge1.cross(edge2).dot(tri.normal);
+		double u = edge3.cross(edge2).dot(tri.normal) / detT;
+		double v = edge1.cross(edge3).dot(tri.normal) / detT;
 
 		distance = (intersectionPoint - origin).length();
 
@@ -219,7 +217,7 @@ struct rayPath
 	double getTotalLength() {
 		double total = 0;
 		int index = 0;
-		for (index = 0; index < completion_index; ++index) {
+		for (index = 0; index <= completion_index; ++index) {
 			total += segment[index].distanceTraveled;
 		}
 		return total;

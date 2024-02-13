@@ -148,8 +148,6 @@ void Perspective::resetPaths()
 		{	
 			// Reset first ray default values
 			rayPaths[x][y].segment[0] = initRayArr[x][y];
-			rayPaths[x][y].illuminated = false;
-			rayPaths[x][y].intersected = false;
 		}
 	}
 }
@@ -167,15 +165,19 @@ void Perspective::calculatePath(const ivec2 pixelCoord)
 	double distance;
 
 	// Closest triangle on this pass
-	double closest_distance = 9999999999999;
+	double closest_distance = 999999999999999;
 	bool intersected;
 	bool done = false;
 
+	currentPath->illuminated = false;
 	ray* current_segment = &currentPath->segment[0];
 
 	for (current_segment_index = 0; current_segment_index < max_segments; ++current_segment_index, ++current_segment) 
 	{
-		// Current segment in for loop
+		// Reset flags
+		done = false;
+		closest_distance = 999999999999999;
+		intersected = false;
 		
 
 		// Loop on triangles
@@ -205,9 +207,10 @@ void Perspective::calculatePath(const ivec2 pixelCoord)
 			{
 				if (distance < closest_distance) 
 				{
+					
 					currentPath->illuminated = true;
 					currentPath->completion_index = current_segment_index;
-					current_segment->color_RGB = lSource.color;
+					current_segment->color_RGB = { 1,1,1 };
 					current_segment->distanceTraveled = distance;
 					done = true;
 				}
@@ -218,16 +221,19 @@ void Perspective::calculatePath(const ivec2 pixelCoord)
 			break;
 		}
 
-		if (current_segment_index < max_segments - 1) 
+		if (current_segment_index < max_segments - 1 && intersected) 
 		{
 			// Set the next ray to continue from last
 			*(current_segment + 1) = current_segment->reflect(closest_normal, closest_intersection);
+			(current_segment + 1)->origin = (current_segment + 1)->origin + (current_segment + 1)->direction * 0.000000000001;
 		}
 	}
-	done = false;
 
 	// Temp fill screen
-	if (currentPath->illuminated) {
-		ScreenArr[pixelCoord.x][pixelCoord.y] = currentPath->segment[0].color_RGB; /// std::pow(currentPath->segment[0].distanceTraveled, 2);
+	if (currentPath->illuminated == true) {
+		ScreenArr[pixelCoord.x][pixelCoord.y] = (currentPath->segment[0].color_RGB / std::pow( currentPath->getTotalLength(), 2 )) * BRIGHTNESS; /// ; std::pow(currentPath->getTotalLength(), 2)
+	}
+	else {
+		ScreenArr[pixelCoord.x][pixelCoord.y] = { 0,0,0 };
 	}
 }

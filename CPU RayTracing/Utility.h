@@ -191,11 +191,20 @@ struct ray {
 
 	bool intersectLightSource(const lightSource& src, double& distance) {
 
-		return (2.0f * (origin - src.position).dot(direction)) *
-			(2.0f * (origin - src.position).dot(direction)) - 4 *
+		// Check if the ray intersects the light source using a quadratic equation
+		bool doesIntersect = (2.0 * (origin - src.position).dot(direction)) *
+			(2.0 * (origin - src.position).dot(direction)) - 4 *
 			(direction.dot(direction)) *
 			((origin - src.position).dot(origin - src.position)
 				- src.radius * src.radius) >= 0;
+
+		// If there is an intersection, calculate the distance from the ray's origin to the intersection point
+		if (doesIntersect) {
+			// Calculate the distance from the ray's origin to the intersection point
+			distance = (origin - src.position).length() - sqrt((origin - src.position).dot(origin - src.position) - src.radius * src.radius);
+		}
+
+		return doesIntersect;
 	}
 
 };

@@ -116,6 +116,18 @@ void Perspective::calculatePathsForRow(int x) {
 		}
 	}
 }
+void Perspective::drawST()
+{
+	int x, y;
+	for (x = 0; x < WIDTH; ++x) {
+		for (y = 0; y < HEIGHT; ++y) 
+		{
+
+			calculatePath({ x, y });
+
+		}
+	}
+}
 void Perspective::clearScreen()
 {
 	int x, y;
@@ -170,15 +182,18 @@ void Perspective::calculatePath(const ivec2 pixelCoord)
 		for (const triangularModel& model : scene.models) {
 			for (const triangle& tri : model.tris) 
 			{
-				if ((current_segment->intersectTriangle(tri, distance, intersectionPoint)) and (distance < closest_distance))
+				if (current_segment->intersectTriangle(tri, distance, intersectionPoint))
 				{
-					intersected = true;
-					closest_intersection = intersectionPoint;
-					closest_normal = tri.normal;
-					closest_distance = distance;
-					currentPath->intersected = true;
-					current_segment->color_RGB = tri.material.color_RGB;
-					current_segment->distanceTraveled = distance;
+					if (distance < closest_distance) 
+					{
+						intersected = true;
+						closest_intersection = intersectionPoint;
+						closest_normal = tri.normal;
+						closest_distance = distance;
+						currentPath->intersected = true;
+						current_segment->color_RGB = tri.material.color_RGB;
+						current_segment->distanceTraveled = distance;
+					}
 				}
 			}
 		}
@@ -186,12 +201,16 @@ void Perspective::calculatePath(const ivec2 pixelCoord)
 		// Loop on light sources 
 		for (const lightSource& lSource : scene.light_sources) 
 		{
-			if ((current_segment->intersectLightSource(lSource, distance)) and (distance < closest_distance))
+			if (current_segment->intersectLightSource(lSource, distance))
 			{
-				currentPath->illuminated = true;
-				currentPath->completion_index = current_segment_index;
-				done = true;
-				break;
+				if (distance < closest_distance) 
+				{
+					currentPath->illuminated = true;
+					currentPath->completion_index = current_segment_index;
+					current_segment->color_RGB = lSource.color;
+					current_segment->distanceTraveled = distance;
+					done = true;
+				}
 			}
 		}
 
@@ -208,7 +227,7 @@ void Perspective::calculatePath(const ivec2 pixelCoord)
 	done = false;
 
 	// Temp fill screen
-	if (currentPath->illuminated and currentPath->intersected) {
+	if (currentPath->illuminated) {
 		ScreenArr[pixelCoord.x][pixelCoord.y] = currentPath->segment[0].color_RGB; /// std::pow(currentPath->segment[0].distanceTraveled, 2);
 	}
 }

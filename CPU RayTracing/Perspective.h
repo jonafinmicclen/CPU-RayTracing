@@ -31,9 +31,9 @@ class Perspective
 {
 public:
 	// measured in pixels
-	static const int WIDTH = 400;
+	static const int WIDTH = 200;
 	// measured in pixels
-	static const int HEIGHT = 400;
+	static const int HEIGHT = 200;
 
 	// perspective origin
 	vec3 origin = { 0,0,-2 };
@@ -54,9 +54,14 @@ public:
 	void generateInitRayArr();
 	// Calculates pixel values from ray intersections with enviroment
 	void calculateScreenArr(const triangularModel model);
-	// Temp fill screenS
+
+	// Temp fill screen multithreaded
 	void testScreenArrFill();
 	void calculatePathsForRow(int x);
+
+	// Singlethreaded draw
+	void drawST();
+
 	// Clears the screen
 	void clearScreen();
 	// Resets paths to init rays
@@ -67,6 +72,6 @@ public:
 private:
 	std::thread threads[WIDTH];
 	const int SPLIT_WIDTH_THREAD = 50;
-	ThreadPool threadPool{ WIDTH/SPLIT_WIDTH_THREAD };
+	ThreadPool threadPool{ 4 };
 };
 

@@ -163,8 +163,8 @@ const vec3 ROTATION_AXIS = { 1,1,0 };
 const double ROTATION_SPEED = 0.01;
 const vec3 ROTATION_POINT = MODEL_POSITION;
 
-const int SCREEN_WIDTH = 400;
-const int SCREEN_HEIGHT = 400;
+const int SCREEN_WIDTH = 200;
+const int SCREEN_HEIGHT = 200;
 
 int main(int argc, char* args[]) {
 
@@ -206,7 +206,7 @@ int main(int argc, char* args[]) {
 
     lSource.color = { 1,1,1 };
     lSource.position = { 15,200,0 };
-    lSource.radius = 100;
+    lSource.radius = 200;
 
     newScene.models.push_back(triCube);
     newScene.light_sources.push_back(lSource);
@@ -236,7 +236,7 @@ int main(int argc, char* args[]) {
         // Draw logic
         p->clearScreen();
         p->resetPaths();
-        p->testScreenArrFill();
+        p->drawST();
         for (int y = 0; y < SCREEN_HEIGHT; ++y) {
             for (int x = 0; x < SCREEN_WIDTH; ++x) {
                 drawPixel(renderer, x, y, p->ScreenArr[x][y].x * 255, p->ScreenArr[x][y].y * 255, p->ScreenArr[x][y].z * 255);

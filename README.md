@@ -11,4 +11,5 @@ To use create a scene object and pass to the object the light sources and the mo
 
 ~Havent done any~ Have done some optimisation still dont expect much fps, *O(WIDTHxHEIGHTx(TRIANGLES+LIGHTSOURCES))*.
 
-![image](https://github.com/jonafinmicclen/CPU-RayTracing/assets/142181218/9ab2a93d-56a8-4a83-890d-47049b31ee6b)
+![image](https://github.com/jonafinmicclen/CPU-RayTracing/assets/142181218/a90a9be8-c653-4ca7-ba98-27b2f47298ef)
+
